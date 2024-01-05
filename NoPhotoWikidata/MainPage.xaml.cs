@@ -1,9 +1,5 @@
-﻿using System.Text;
-using WikidataCommon;
+﻿using WikidataCommon;
 using Binding = WikidataCommon.Binding;
-using CommunityToolkit.Maui.Storage;
-using System.Threading;
-using Java.Sql;
 
 namespace NoPhotoWikidata
 {
@@ -12,7 +8,8 @@ namespace NoPhotoWikidata
         string[] exludedDescriptionWords =
         {
             "hotel in",
-            "hostel in"
+            "hostel in",
+            "guesthouse in"
         };
 
         public MainPage()

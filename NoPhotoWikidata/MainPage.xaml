@@ -7,6 +7,14 @@
         <VerticalStackLayout
             Padding="30,0"
             Spacing="25">
+            <Label
+                Text="Search radius in degrees:"
+                FontSize="Caption"
+                HorizontalOptions="Start" />
+            <Editor
+                Text="{Binding SearchRadiusDegrees}"
+                Keyboard="Numeric"
+                HorizontalOptions="Fill"/>
             <Button
                 x:Name="GetGpxButton"
                 Text="Get Gpx" 

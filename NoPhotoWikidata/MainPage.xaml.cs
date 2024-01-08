@@ -1,10 +1,12 @@
-﻿using WikidataCommon;
+﻿using System.Globalization;
+using WikidataCommon;
 using Binding = WikidataCommon.Binding;
 
 namespace NoPhotoWikidata
 {
     public partial class MainPage : ContentPage
     {
+        private readonly AppSettings context;
         private readonly string[] exludedDescriptionWords =
         [
             "hotel in",
@@ -17,6 +19,8 @@ namespace NoPhotoWikidata
         public MainPage()
         {
             InitializeComponent();
+            context = new AppSettings();
+            BindingContext = context;
         }
 
         private async void GetGpxButton_Clicked(object sender, EventArgs e)
@@ -34,7 +38,13 @@ namespace NoPhotoWikidata
                 Longitude = location.Longitude,
             };
 
-            WikidataQueryResult queryResult = QueryService.GetWikiLocationsForLocation(coordinates, 0.1);
+            double searchRadiusDegrees = double.Parse(context.SearchRadiusDegrees, CultureInfo.InvariantCulture);
+            WikidataQueryResult? queryResult = QueryService.GetWikiLocationsForLocation(coordinates, searchRadiusDegrees);
+            if (queryResult == null)
+            {
+                return;
+            }
+
             List<Binding> locations = queryResult.results.bindings;
             List<Binding> locationsWithoutImage = locations.Where(l => LocationNotAHotelAndDoesntHaveImage(l)).ToList();
             string gpx = GpxGenerator.GenerateGpxFromWikidataResult(locationsWithoutImage);

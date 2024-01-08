@@ -5,12 +5,14 @@ namespace NoPhotoWikidata
 {
     public partial class MainPage : ContentPage
     {
-        string[] exludedDescriptionWords =
-        {
+        private readonly string[] exludedDescriptionWords =
+        [
             "hotel in",
             "hostel in",
             "guesthouse in"
-        };
+        ];
+
+        private const string DefualtGpxFileNamePrefix = "NoPhotoLocations_.";
 
         public MainPage()
         {
@@ -19,8 +21,14 @@ namespace NoPhotoWikidata
 
         private async void GetGpxButton_Clicked(object sender, EventArgs e)
         {
-            Microsoft.Maui.Devices.Sensors.Location location = await Geolocation.Default.GetLastKnownLocationAsync();
-            Coordinates coordinates = new Coordinates()
+            Microsoft.Maui.Devices.Sensors.Location? location = await Geolocation.Default.GetLastKnownLocationAsync();
+            if(location == null)
+            {
+                await DisplayAlert("No luck", "Unable to get last location", "OK");
+                return;
+            }
+
+            Coordinates coordinates = new()
             {
                 Lattittude = location.Latitude,
                 Longitude = location.Longitude,
@@ -30,13 +38,13 @@ namespace NoPhotoWikidata
             List<Binding> locations = queryResult.results.bindings;
             List<Binding> locationsWithoutImage = locations.Where(l => LocationNotAHotelAndDoesntHaveImage(l)).ToList();
             string gpx = GpxGenerator.GenerateGpxFromWikidataResult(locationsWithoutImage);
-            string name = "NoPhotoLocations_" + DateTime.Now + ".gpx";
-            string file = Path.Combine(FileSystem.CacheDirectory, name);
-            File.WriteAllText(file, gpx);
-            await Launcher.Default.OpenAsync(new OpenFileRequest(name, new ReadOnlyFile(file)));
+            string fileName = GetFileName(coordinates);
+            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+            File.WriteAllText(filePath, gpx);
+            await Launcher.Default.OpenAsync(new OpenFileRequest(fileName, new ReadOnlyFile(filePath)));
         }
 
-        bool LocationNotAHotelAndDoesntHaveImage(Binding location)
+        private bool LocationNotAHotelAndDoesntHaveImage(Binding location)
         {
             if (location.image != null)
                 return false;
@@ -52,6 +60,18 @@ namespace NoPhotoWikidata
 
             return true;
         }
-    }
 
+        private static string GetFileName(Coordinates coordinates)
+        {
+            string fileNamePrefix = DefualtGpxFileNamePrefix;
+            string? locationName = QueryService.GetLocationNameFromCoordinates(coordinates);
+            if (locationName != null)
+            {
+                fileNamePrefix = locationName + "_";
+            }
+
+            string fileName = fileNamePrefix + DateTime.Now + ".gpx";
+            return fileName;
+        }
+    }
 }

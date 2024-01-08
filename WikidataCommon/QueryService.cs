@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Globalization;
 using System.Net;
-using System.Net.Http;
 
 namespace WikidataCommon
 {
@@ -12,24 +11,24 @@ namespace WikidataCommon
         private const int MAX_LONGITUDE = 180;
         private const int MIN_LONGITUDE = -180;
 
-        public static WikidataQueryResult GetWikiLocationsForLocation(Coordinates deviceLocation, double searchRadiusDegrees)
+        public static WikidataQueryResult? GetWikiLocationsForLocation(Coordinates deviceLocation, double searchRadiusDegrees)
         {
-            Coordinates southWestcorner = new Coordinates()
+            Coordinates southWestcorner = new()
             {
                 Lattittude = AddLattittude(deviceLocation.Lattittude, -searchRadiusDegrees),
                 Longitude = AddLongitude(deviceLocation.Longitude, -searchRadiusDegrees)
             };
 
-            Coordinates northEastcorner = new Coordinates()
+            Coordinates northEastcorner = new()
             {
                 Lattittude = AddLattittude(deviceLocation.Lattittude, searchRadiusDegrees),
                 Longitude = AddLongitude(deviceLocation.Longitude, searchRadiusDegrees)
             };
 
             string query = $"SELECT ?q ?qLabel ?location ?image ?reason ?desc ?commonscat ?street WHERE {{ SERVICE wikibase:box {{ ?q wdt:P625 ?location . bd:serviceParam wikibase:cornerSouthWest \"Point({southWestcorner.LongitudeString} {southWestcorner.LattittudeString})\"^^geo:wktLiteral . bd:serviceParam wikibase:cornerNorthEast \"Point({northEastcorner.Longitude.ToString("F6", CultureInfo.InvariantCulture)} {northEastcorner.Lattittude.ToString("F6", CultureInfo.InvariantCulture)})\"^^geo:wktLiteral }} OPTIONAL {{ ?q wdt:P18 ?image }} OPTIONAL {{ ?q wdt:P373 ?commonscat }} OPTIONAL {{ ?q wdt:P969 ?street }} SERVICE wikibase:label {{ bd:serviceParam wikibase:language \"en,en,de,fr,es,it,nl,ru\" . ?q schema:description ?desc . ?q rdfs:label ?qLabel }} }} LIMIT 3000";
-            string url = @$"https://query.wikidata.org/bigdata/namespace/wdq/sparql?query={Uri.EscapeDataString(query)}&format=json";
-            WikidataQueryResult wikidataQueryResult = null;
-            using (HttpClient client = new HttpClient())
+            string url = $"https://query.wikidata.org/bigdata/namespace/wdq/sparql?query={Uri.EscapeDataString(query)}&format=json";
+            WikidataQueryResult? wikidataQueryResult = null;
+            using (HttpClient client = new())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "NoPhotoWikidata");
                 try
@@ -44,6 +43,25 @@ namespace WikidataCommon
             }
 
             return wikidataQueryResult;
+        }
+
+        public static string? GetLocationNameFromCoordinates(Coordinates coordinates)
+        {
+            string queryUrl = $"https://nominatim.openstreetmap.org/reverse?lat={coordinates.LattittudeString}&lon={coordinates.LongitudeString}&format=json";
+            using HttpClient client = new();
+            client.DefaultRequestHeaders.Add("User-Agent", "NoPhotoWikidata");
+            client.DefaultRequestHeaders.Add("accept-language", CultureInfo.CurrentUICulture.Name);
+            try
+            {
+                string jsonResponse = client.GetStringAsync(queryUrl).Result;
+                LocationInfoRequestResult? locationInfo = JsonConvert.DeserializeObject<LocationInfoRequestResult>(jsonResponse);
+                string? locationName = locationInfo?.address?.city;
+                return locationName;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private static double AddLattittude(double firsDegree, double secondDegree)
@@ -76,13 +94,6 @@ namespace WikidataCommon
             }
 
             return sum;
-        }
-
-
-        public static WikidataQueryResult JsonToWikidataQueryResult(string json)
-        {
-            WikidataQueryResult wikidataQueryResult = JsonConvert.DeserializeObject<WikidataQueryResult>(json);
-            return wikidataQueryResult;
         }
     }
 }

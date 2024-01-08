@@ -24,8 +24,8 @@ namespace WikidataCommon
                 {
                     writer.WriteStartElement("wpt");
                     Coordinates coordinates = GetCoordinates(location);
-                    writer.WriteAttributeString("lat", coordinates.Lattittude.ToString("F6", CultureInfo.InvariantCulture));
-                    writer.WriteAttributeString("lon", coordinates.Longitude.ToString("F6", CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("lat", coordinates.LattittudeString);
+                    writer.WriteAttributeString("lon", coordinates.LongitudeString);
 
                     writer.WriteElementString("name", location.qLabel.value);
                     writer.WriteElementString("desc", GetDescription(location));

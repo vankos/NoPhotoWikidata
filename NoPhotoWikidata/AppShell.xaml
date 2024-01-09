@@ -8,7 +8,6 @@
     Title="NoPhotoWikidata">
 
     <ShellContent
-        Title="Wiki need photo"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 

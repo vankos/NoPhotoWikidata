@@ -4,13 +4,13 @@ namespace NoPhotoWikidata
 {
     public class AppSettings : INotifyPropertyChanged
     {
-        public const string DefaultSearchRadiusDegrees = "0.05";
-        public const string SearchRadiusDegreesSettingsKey = "SearchRadiusDegreesSettingsKey";
+        private const string defaultSearchRadiusDegrees = "0.05";
+        private const string searchRadiusDegreesSettingsKey = "SearchRadiusDegreesSettingsKey";
         private string searchRadiusDegrees;
 
         public AppSettings()
         {
-            SearchRadiusDegrees = Preferences.Default.Get(SearchRadiusDegreesSettingsKey, DefaultSearchRadiusDegrees);
+            SearchRadiusDegrees = Preferences.Default.Get(searchRadiusDegreesSettingsKey, defaultSearchRadiusDegrees);
         }
 
         public string SearchRadiusDegrees
@@ -18,8 +18,8 @@ namespace NoPhotoWikidata
             get => searchRadiusDegrees;
             set
             {
-                Preferences.Default.Set(SearchRadiusDegreesSettingsKey, value);
                 searchRadiusDegrees = value;
+                Preferences.Default.Set(searchRadiusDegreesSettingsKey, value);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SearchRadiusDegrees)));
             }
         }

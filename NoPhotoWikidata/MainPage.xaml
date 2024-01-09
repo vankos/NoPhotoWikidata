@@ -8,7 +8,7 @@
             Padding="30,0"
             Spacing="25">
             <Label
-                Text="Search radius in degrees:"
+                Text="Search radius in degrees (Max 3000 points):"
                 FontSize="Caption"
                 HorizontalOptions="Start" />
             <Editor

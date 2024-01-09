@@ -10,7 +10,7 @@ namespace WikidataCommon
         private const string LattittudeRegexp = @" (.*)\)";
         private const string LongitudeRegexp1 = @"\((.*) ";
 
-        public static string GenerateGpxFromWikidataResult(List<Binding> locations) 
+        public static string GenerateGpxFromWikidataResult(IEnumerable<Binding> locations) 
         {
             StringBuilder gpxStringBuilder = new StringBuilder();
             using (XmlWriter writer = XmlWriter.Create(gpxStringBuilder, new XmlWriterSettings { Indent = true }))

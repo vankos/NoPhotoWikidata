@@ -8,19 +8,29 @@
             Padding="30,0"
             Spacing="25">
             <Label
-                Text="Search radius in degrees (Max 3000 points):"
+                Text="Search radius in degrees (Max 3000 points will be added):"
                 FontSize="Caption"
                 HorizontalOptions="Start" />
             <Editor
                 Text="{Binding SearchRadiusDegrees}"
                 Keyboard="Numeric"
                 HorizontalOptions="Fill"/>
+            <Label
+                Text="Serach exclusions - points with this words in description will be excluded. Separate by new line"
+                FontSize="Caption"
+                HorizontalOptions="Start" />
+            <Editor
+                Text="{Binding DescriptionExclusions}"
+                Keyboard="Text"
+                AutoSize="TextChanges"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill"/>
             <Button
                 x:Name="GetGpxButton"
                 Text="Get Gpx" 
                 SemanticProperties.Hint="Create and open gpx file with wiki pages without photo"
                 Clicked="GetGpxButton_Clicked"
-                HorizontalOptions="Fill" />
+                HorizontalOptions="Fill"/>
         </VerticalStackLayout>
     </ScrollView>
 

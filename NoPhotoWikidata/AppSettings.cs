@@ -8,9 +8,21 @@ namespace NoPhotoWikidata
         private const string searchRadiusDegreesSettingsKey = "SearchRadiusDegreesSettingsKey";
         private string searchRadiusDegrees;
 
+        private string descriptionExclusions;
+        private readonly List<string> DefaultDescriptionExclusions =
+        [
+            "hotel in",
+            "hostel in",
+            "guesthouse in",
+            "appartments in",
+        ];
+        private const string exludedDescriptionWordsSettingsKey = "ExludedDescriptionWordsSettingsKey";
+
         public AppSettings()
         {
             SearchRadiusDegrees = Preferences.Default.Get(searchRadiusDegreesSettingsKey, defaultSearchRadiusDegrees);
+            string defaultDescriptionExclusionsJoined = string.Join(Environment.NewLine, DefaultDescriptionExclusions);
+            DescriptionExclusions = Preferences.Default.Get(exludedDescriptionWordsSettingsKey, defaultDescriptionExclusionsJoined);
         }
 
         public string SearchRadiusDegrees
@@ -21,6 +33,17 @@ namespace NoPhotoWikidata
                 searchRadiusDegrees = value;
                 Preferences.Default.Set(searchRadiusDegreesSettingsKey, value);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SearchRadiusDegrees)));
+            }
+        }
+
+        public string DescriptionExclusions
+        {
+            get => descriptionExclusions;
+            set
+            {
+                descriptionExclusions = value;
+                Preferences.Default.Set(exludedDescriptionWordsSettingsKey, value);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DescriptionExclusions)));
             }
         }
 

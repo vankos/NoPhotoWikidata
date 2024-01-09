@@ -7,12 +7,6 @@ namespace NoPhotoWikidata
     public partial class MainPage : ContentPage
     {
         private readonly AppSettings context;
-        private readonly string[] exludedDescriptionWords =
-        [
-            "hotel in",
-            "hostel in",
-            "guesthouse in"
-        ];
 
         private const string DefualtGpxFileNamePrefix = "NoPhotoLocations_.";
 
@@ -46,29 +40,14 @@ namespace NoPhotoWikidata
             }
 
             List<Binding> locations = queryResult.results.bindings;
-            List<Binding> locationsWithoutImage = locations.Where(l => LocationNotAHotelAndDoesntHaveImage(l)).ToList();
-            string gpx = GpxGenerator.GenerateGpxFromWikidataResult(locationsWithoutImage);
+            IEnumerable<Binding> locationsWithoutImage = LocationFilter.FilterByDoesntHaveImage(locations);
+            string[] exclusions = context.DescriptionExclusions.Split(Environment.NewLine);
+            IEnumerable<Binding> filteredLocations = LocationFilter.FilterByHaveExlusionsInDescription(locationsWithoutImage, exclusions);
+            string gpx = GpxGenerator.GenerateGpxFromWikidataResult(filteredLocations);
             string fileName = GetFileName(coordinates);
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
             File.WriteAllText(filePath, gpx);
             await Launcher.Default.OpenAsync(new OpenFileRequest(fileName, new ReadOnlyFile(filePath)));
-        }
-
-        private bool LocationNotAHotelAndDoesntHaveImage(Binding location)
-        {
-            if (location.image != null)
-                return false;
-
-            if (location.desc?.value == null)
-                return true;
-
-            foreach (string exclusion in exludedDescriptionWords)
-            {
-                if (location.desc.value.Contains(exclusion, StringComparison.CurrentCultureIgnoreCase))
-                    return false;
-            }
-
-            return true;
         }
 
         private static string GetFileName(Coordinates coordinates)

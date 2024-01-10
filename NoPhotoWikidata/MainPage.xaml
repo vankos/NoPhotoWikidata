@@ -18,6 +18,10 @@
                    FontAttributes="Bold"
                    TextColor="{AppThemeBinding Light=#DE4436, Dark=#FF7043}"
                    Margin="0,0,0,25"/>
+            <Label Text="Generate GPX with Wikidata pages's locations that needs photo around your current location"
+                   HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light=#DE4436, Dark=#FF7043}"
+                   Margin="0,0,0,25"/>
 
             <!-- Search Radius Input -->
             <Label Text="Search Radius in Degrees (Max 3000 points):"

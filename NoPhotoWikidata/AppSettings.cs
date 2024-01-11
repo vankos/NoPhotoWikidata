@@ -18,7 +18,7 @@ namespace NoPhotoWikidata
             "hotel in",
             "hostel in",
             "guesthouse in",
-            "appartments in",
+            "apartment in",
         ];
         private const string exludedDescriptionWordsSettingsKey = "ExludedDescriptionWordsSettingsKey";
 

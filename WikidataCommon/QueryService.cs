@@ -36,7 +36,7 @@ namespace WikidataCommon
                     string response = client.GetStringAsync(url).Result;
                     wikidataQueryResult = JsonConvert.DeserializeObject<WikidataQueryResult>(response);
                 }
-                catch (WebException ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine("Error: " + ex.Message);
                 }

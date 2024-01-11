@@ -2,7 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="NoPhotoWikidata.MainPage"
+             xmlns:vm="clr-namespace:NoPhotoWikidata"
              BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#121212}">
+
+    <ContentPage.BindingContext>
+        <vm:AppSettings />
+    </ContentPage.BindingContext>
 
     <ScrollView>
         <VerticalStackLayout
@@ -57,7 +62,7 @@
 
             <!-- Action Button -->
             <Button x:Name="GetGpxButton"
-                    Text="Get GPX File"
+                    Text="{Binding ButtonText}"
                     HorizontalOptions="Fill"
                     BackgroundColor="{AppThemeBinding Light=#DE4436, Dark=#FF7043}"
                     TextColor="White"
@@ -66,7 +71,8 @@
                     CornerRadius="5"
                     HeightRequest="50"
                     Margin="0,0,0,10"
-                    Command="{Binding GetGpxCommand}"/>
+                    Command="{Binding GetGpxCommand}"
+                    IsEnabled="{Binding IsNotBusy}"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

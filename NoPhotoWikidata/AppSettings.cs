@@ -13,6 +13,7 @@ namespace NoPhotoWikidata
         private string searchRadiusDegrees;
 
         private string descriptionExclusions;
+        private bool isNotBusy;
         private readonly List<string> DefaultDescriptionExclusions =
         [
             "hotel in",
@@ -24,11 +25,14 @@ namespace NoPhotoWikidata
 
         private const string DefualtGpxFileNamePrefix = "NoPhotoLocations_.";
 
+        public event EventHandler<string> OnError;
+
         public AppSettings()
         {
             SearchRadiusDegrees = Preferences.Default.Get(searchRadiusDegreesSettingsKey, defaultSearchRadiusDegrees);
             string defaultDescriptionExclusionsJoined = string.Join(Environment.NewLine, DefaultDescriptionExclusions);
             DescriptionExclusions = Preferences.Default.Get(exludedDescriptionWordsSettingsKey, defaultDescriptionExclusionsJoined);
+            isNotBusy = true;
         }
 
         public string SearchRadiusDegrees
@@ -53,16 +57,30 @@ namespace NoPhotoWikidata
             }
         }
 
-        public ICommand GetGpxCommand => new Command(async () => await GetGpx());
+        public bool IsNotBusy
+        {
+            get => isNotBusy;
+            set
+            {
+                isNotBusy = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsNotBusy)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ButtonText)));
+            }
+        }
+
+        public string ButtonText => IsNotBusy ? "Get GPX File" : "Getting GPX...";
+
+        public ICommand GetGpxCommand => new Command(() => GetGpx());
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private async Task GetGpx()
+        private void GetGpx()
         {
-            Microsoft.Maui.Devices.Sensors.Location? location = await Geolocation.Default.GetLastKnownLocationAsync();
+            IsNotBusy = false;
+            Microsoft.Maui.Devices.Sensors.Location? location = Geolocation.Default.GetLastKnownLocationAsync().Result;
             if (location == null)
             {
-                //await DisplayAlert("No luck", "Unable to get last location", "OK");
+                OnError.Invoke(this, "Unable to get last location");
                 return;
             }
 
@@ -76,6 +94,7 @@ namespace NoPhotoWikidata
             WikidataQueryResult? queryResult = QueryService.GetWikiLocationsForLocation(coordinates, searchRadiusDegrees);
             if (queryResult == null)
             {
+                OnError.Invoke(this, "Unable to get data from server");
                 return;
             }
 
@@ -83,11 +102,18 @@ namespace NoPhotoWikidata
             IEnumerable<Binding> locationsWithoutImage = LocationFilter.FilterByDoesntHaveImage(locations);
             string[] exclusions = DescriptionExclusions.Split(Environment.NewLine);
             IEnumerable<Binding> filteredLocations = LocationFilter.FilterByHaveExlusionsInDescription(locationsWithoutImage, exclusions);
+            if (!filteredLocations.Any())
+            {
+                OnError.Invoke(this, "No points with this params");
+                return;
+            }
+
             string gpx = GpxGenerator.GenerateGpxFromWikidataResult(filteredLocations);
             string fileName = GetFileName(coordinates);
             string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
             File.WriteAllText(filePath, gpx);
-            await Launcher.Default.OpenAsync(new OpenFileRequest(fileName, new ReadOnlyFile(filePath)));
+            Launcher.Default.OpenAsync(new OpenFileRequest(fileName, new ReadOnlyFile(filePath)));
+            IsNotBusy = true;
         }
 
         private static string GetFileName(Coordinates coordinates)

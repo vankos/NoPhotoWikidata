@@ -17,7 +17,7 @@
             VerticalOptions="StartAndExpand">
 
             <!-- Title Label -->
-            <Label Text="Wiki need photo"
+            <Label Text="Wiki needs photos"
                    FontSize="Large"
                    HorizontalOptions="Center"
                    FontAttributes="Bold"

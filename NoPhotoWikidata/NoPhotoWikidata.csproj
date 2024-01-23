@@ -21,7 +21,7 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>NoPhotoWikidata</ApplicationTitle>
+		<ApplicationTitle>Wiki needs photos</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.nophotowikidata</ApplicationId>

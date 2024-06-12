@@ -55,13 +55,43 @@ namespace WikidataCommon
             {
                 string jsonResponse = client.GetStringAsync(queryUrl).Result;
                 LocationInfoRequestResult? locationInfo = JsonConvert.DeserializeObject<LocationInfoRequestResult>(jsonResponse);
-                string? locationName = locationInfo?.address?.city;
+                string? locationName = GetLocationNameFromLocationInfo(locationInfo); ;
                 return locationName;
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+
+        private static string? GetLocationNameFromLocationInfo(LocationInfoRequestResult? locationInfo)
+        {
+            if(!string.IsNullOrEmpty(locationInfo?.address?.suburb))
+            {
+                return locationInfo?.address?.suburb;
+            }
+
+            if(!string.IsNullOrEmpty(locationInfo?.address?.city))
+            {
+                return locationInfo?.address?.city;
+            }
+
+            if (!string.IsNullOrEmpty(locationInfo?.address?.state))
+            {
+                return locationInfo?.address?.state;
+            }
+
+            if (!string.IsNullOrEmpty(locationInfo?.address?.country))
+            {
+                return locationInfo?.address?.country;
+            }
+
+            if (!string.IsNullOrEmpty(locationInfo?.display_name))
+            {
+                return locationInfo?.display_name;
+            }
+
+            return null;
         }
 
         private static double AddLattittude(double firsDegree, double secondDegree)
